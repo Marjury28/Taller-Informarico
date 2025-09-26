@@ -1,37 +1,41 @@
-import "dotenv/config";
 import express from "express";
-import helmet from "helmet";
+import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
-import mongoose from "mongoose";
-import tasksRouter from "./routes/tasks.routes.js";
+import { connectDB } from "./config/db.js";
+import { notFound, errorHandler } from "./middleware/error.js";
+import tasksRoutes from "./routes/tasks.routes.js";
+
+dotenv.config();
 
 const app = express();
 
-app.use(helmet());
-app.use(cors({ origin: true, credentials: true }));
+// Middlewares
+app.use(cors());
 app.use(express.json());
-app.use(morgan("dev"));
-
-app.get("/health", (_, res) => res.json({ ok: true }));
-app.use("/api/tasks", tasksRouter);
-
-const PORT = process.env.PORT || 5000;
-app.get("/", (_, res) => {
-  res.type("text").send("Taskmaster API running. Try /health or /api/tasks");
-});
-
-async function start() {
-  const uri = process.env.MONGO_URI;
-  if (!uri) {
-    console.error("Falta MONGO_URI en .env");
-    process.exit(1);
-  }
-  await mongoose.connect(uri, { dbName: process.env.MONGO_DB || "taskmaster" });
-  app.listen(PORT, () => console.log(`API: http://localhost:${PORT}`));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
 }
 
-// Evita levantar servidor durante tests
-if (process.env.JEST_WORKER_ID === undefined) start();
+// Rutas
+app.get("/health", (_req, res) => res.json({ ok: true }));
+app.use("/api/tasks", tasksRoutes);
 
-export default app;
+// Middlewares de error
+app.use(notFound);
+app.use(errorHandler);
+
+async function main() {
+  try {
+    await connectDB();
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`🚀 Servidor en puerto ${PORT}`));
+  } catch (error) {
+    console.error("❌ Error al iniciar el servidor:", error);
+    process.exit(1);
+  }
+}
+
+main();
+
+export default app; // Exportar para tests

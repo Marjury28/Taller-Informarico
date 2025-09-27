@@ -1,11 +1,13 @@
 {
-  "name": "taskmaster-backend",
+  "name": "taskmaster",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
-  "main": "server.js",
+  "description": "Taller MERN con pruebas (Jest + Cypress)",
   "scripts": {
-    "dev": "node --watch server.js",
-    "start": "node server.js",
+    "dev": "node --watch backend/server.js",
+    "dev:test-api": "cross-env NODE_ENV=test node backend/server.js",
+    "start": "node backend/server.js",
     "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:cov": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --coverage",
@@ -21,6 +23,8 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "cross-env": "^10.0.0",
+    "cypress": "^13.17.0",
     "jest": "^29.7.0",
     "supertest": "^7.0.0"
   }

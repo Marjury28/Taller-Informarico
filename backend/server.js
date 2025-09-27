@@ -21,28 +21,29 @@ if (process.env.NODE_ENV === "development") {
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/tasks", tasksRoutes);
 
-// Middlewares de error
+// Errores
 app.use(notFound);
 app.use(errorHandler);
 
-// 👇 Cambio clave: no arrancar en entorno de pruebas
-export async function start() {
+async function start() {
   try {
-    await connectDB();
     const PORT = process.env.PORT || 5000;
+
+    if (process.env.NODE_ENV === "test") {
+      // ⚠️ En pruebas NO conectamos a DB (router usa memoria)
+      app.listen(PORT, () => console.log(`🚀 Servidor TEST en puerto ${PORT}`));
+      return;
+    }
+
+    // Dev/Prod: conectar a DB
+    await connectDB();
     app.listen(PORT, () => console.log(`🚀 Servidor en puerto ${PORT}`));
   } catch (error) {
     console.error("❌ Error al iniciar el servidor:", error);
-    // Evita cortar el runner de Jest en tests
-    if (process.env.NODE_ENV !== "test") {
-      process.exit(1);
-    }
+    if (process.env.NODE_ENV !== "test") process.exit(1);
   }
 }
 
-// Solo inicia si NO es entorno de pruebas
-if (process.env.NODE_ENV !== "test") {
-  start();
-}
+start();
 
-export default app; // queda exportado para Jest/Supertest
+export default app;

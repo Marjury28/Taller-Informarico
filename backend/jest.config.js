@@ -1,7 +1,8 @@
-export default {
+﻿export default {
   testEnvironment: "node",
-  transform: {},
-  roots: ["<rootDir>/tests"],
+  transform: {}, // ESM puro
+  roots: ["<rootDir>/backend/tests"], // <<---- carpeta de pruebas
+  testMatch: ["**/*.test.js"],
   moduleFileExtensions: ["js", "mjs"],
   verbose: true,
 };

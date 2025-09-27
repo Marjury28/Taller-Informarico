@@ -25,17 +25,24 @@ app.use("/api/tasks", tasksRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-async function main() {
+// 👇 Cambio clave: no arrancar en entorno de pruebas
+export async function start() {
   try {
     await connectDB();
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => console.log(`🚀 Servidor en puerto ${PORT}`));
   } catch (error) {
     console.error("❌ Error al iniciar el servidor:", error);
-    process.exit(1);
+    // Evita cortar el runner de Jest en tests
+    if (process.env.NODE_ENV !== "test") {
+      process.exit(1);
+    }
   }
 }
 
-main();
+// Solo inicia si NO es entorno de pruebas
+if (process.env.NODE_ENV !== "test") {
+  start();
+}
 
-export default app; // Exportar para tests
+export default app; // queda exportado para Jest/Supertest
